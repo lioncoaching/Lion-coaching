@@ -4,7 +4,7 @@ Static landing page and subscription checkout for Coach Ahmed Amin (Coach LION).
 
 ## Structure
 ```
-index.html        Landing page: hero, why-fail, about, features, program preview, results, steps, plans, FAQ, checkout
+index.html        Landing page: hero, about, features, steps, plans, FAQ, checkout modal
 policy.html       Terms, refund, freeze and privacy policy
 assets/config.js  WhatsApp number, payment numbers, plans and prices (edit here only)
 assets/main.js    Plans rendering, checkout flow, WhatsApp message builder
@@ -23,7 +23,3 @@ Deep link: `index.html?plan=1m` / `?plan=3m` / `?plan=6m` opens checkout with th
 ## Deploy (GitHub Pages)
 Push to a repo, go to Settings → Pages, choose Deploy from branch → `main` / root.
 The site also works as-is on Netlify, Vercel or Cloudflare Pages (drag & drop the folder).
-
-## Adding transformations
-1. Hide the face **in the image file itself** (a CSS blur can be bypassed by downloading the image), then save it as `.webp` in `assets/results/`.
-2. Add an entry to `transformations` in `assets/config.js`. The section appears automatically and stays hidden while the list is empty.
