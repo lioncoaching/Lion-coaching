@@ -33,7 +33,14 @@ window.LION_CONFIG = {
   // { before: "assets/results/c1-before.webp", after: "assets/results/c1-after.webp",
   //   title: "خسارة 12 كيلو دهون", duration: "4 شهور", tags: ["تنشيف", "مبتدئ"] }
   // أو صورة واحدة مجمّعة: { image: "assets/results/c2.webp", title: "...", duration: "..." }
-  transformations: [],
+  transformations: [
+    { before: "assets/results/c1-before.webp", after: "assets/results/c1-after.webp",
+      title: "حرق دهون + بناء عضل", tags: ["إعادة تشكيل", "سكس باك"] },
+    { before: "assets/results/c2-before.webp", after: "assets/results/c2-after.webp",
+      title: "تنشيف وتقسيم كامل", tags: ["تنشيف", "تجهيز بطولة"] },
+    { before: "assets/results/c3-before.webp", after: "assets/results/c3-after.webp",
+      title: "خسارة دهون وظهور العضل", tags: ["تنشيف", "مبتدئ"] }
+  ],
 
   plans: [
     {
