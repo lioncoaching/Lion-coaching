@@ -25,6 +25,16 @@ window.LION_CONFIG = {
     }
   ],
 
+  instagram: "LIONISM__",
+
+  // صور التحول — حط الصور في assets/results/ (الوش لازم يكون متغطي في الصورة نفسها)
+  // لو القائمة فاضية، قسم النتايج بيستخبى تلقائياً
+  // مثال:
+  // { before: "assets/results/c1-before.webp", after: "assets/results/c1-after.webp",
+  //   title: "خسارة 12 كيلو دهون", duration: "4 شهور", tags: ["تنشيف", "مبتدئ"] }
+  // أو صورة واحدة مجمّعة: { image: "assets/results/c2.webp", title: "...", duration: "..." }
+  transformations: [],
+
   plans: [
     {
       id: "1m",

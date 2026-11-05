@@ -42,6 +42,19 @@
         <div class="per-month">${p.months > 1 ? `يعني ${fmt(Math.round(p.price / p.months))} جنيه في الشهر` : 'بدون التزام لمدة أطول'}</div>
       </div>`).join('');
   }
+  /* ---------- transformations ---------- */
+  const rs = $('#results'), rg = $('#resultsGrid'), T = C.transformations || [];
+  if (rs && rg && T.length) {
+    rg.innerHTML = T.map(t => `
+      <div class="result rv">
+        ${t.image
+          ? `<div class="single"><img src="${t.image}" alt="${t.title || ''}" loading="lazy"></div>`
+          : `<div class="ba"><div><img src="${t.before}" alt="قبل" loading="lazy"><span>BEFORE</span></div><div><img src="${t.after}" alt="بعد" loading="lazy"><span>AFTER</span></div></div>`}
+        <div class="meta"><b>${t.title || ''}</b>${t.duration ? `<small>المدة: ${t.duration}</small>` : ''}
+          ${t.tags ? `<div class="tagline">${t.tags.map(x => `<span class="chip">${x}</span>`).join('')}</div>` : ''}</div>
+      </div>`).join('');
+    rs.hidden = false;
+  }
   observe();
 
   /* ---------- checkout ---------- */
