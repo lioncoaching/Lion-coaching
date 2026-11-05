@@ -39,7 +39,11 @@ window.LION_CONFIG = {
     { before: "assets/results/c2-before.webp", after: "assets/results/c2-after.webp",
       title: "تنشيف وتقسيم كامل", tags: ["تنشيف", "تجهيز بطولة"] },
     { before: "assets/results/c3-before.webp", after: "assets/results/c3-after.webp",
-      title: "خسارة دهون وظهور العضل", tags: ["تنشيف", "مبتدئ"] }
+      title: "خسارة دهون وظهور العضل", tags: ["تنشيف", "مبتدئ"] },
+    { before: "assets/results/c4-before.webp", after: "assets/results/c4-after.webp",
+      title: "خسارة دهون وشد الجسم", tags: ["تنشيف", "فوق الـ 40"] },
+    { before: "assets/results/c5-before.webp", after: "assets/results/c5-after.webp",
+      title: "بناء عضل وتقسيم", tags: ["تضخيم نظيف", "مبتدئ"] }
   ],
 
   plans: [
