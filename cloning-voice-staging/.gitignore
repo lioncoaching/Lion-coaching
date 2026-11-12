@@ -1,8 +1,0 @@
-__pycache__/
-*.pyc
-.venv/
-engine/.bin/
-engine/Wav2Lip/
-engine/.cache/
-studio/data/
-studio/.env

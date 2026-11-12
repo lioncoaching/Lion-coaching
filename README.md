@@ -23,6 +23,3 @@ Deep link: `index.html?plan=1m` / `?plan=3m` / `?plan=6m` opens checkout with th
 ## Deploy (GitHub Pages)
 Push to a repo, go to Settings → Pages, choose Deploy from branch → `main` / root.
 The site also works as-is on Netlify, Vercel or Cloudflare Pages (drag & drop the folder).
-
-## صوتك (voice/) — تطبيق ستاتيك لتوليد صوت بصوتك مجاناً
-يتنشر مع الموقع على GitHub Pages في `/voice/`. بدون سيرفر: بيكلّم Spaces مجانية على Hugging Face (المجلد `hf-space/`) أو ElevenLabs بمفتاحك من متصفحك. التفاصيل في `hf-space/README.md`.
