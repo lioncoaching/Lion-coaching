@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from ..config import PLANS, settings
@@ -35,19 +36,25 @@ def video_cost(seconds: float) -> int:
     return max(1, round(seconds * settings.CREDITS_PER_VIDEO_SECOND))
 
 
-def require(db: Session, user: User, amount: int) -> None:
-    refresh_monthly(db, user)
-    if user.credits < amount:
-        raise HTTPException(402, f"رصيدك {user.credits} كريدت والعملية تحتاج {amount}. رقّي باقتك.")
-
-
 def charge(db: Session, user: User, amount: int, reason: str, job_id: str = "") -> None:
-    user.credits -= amount
+    """Atomically reserve `amount` credits *before* any paid work happens.
+    A single conditional UPDATE means concurrent requests cannot overdraw the balance."""
+    refresh_monthly(db, user)
+    result = db.execute(
+        update(User).where(User.id == user.id, User.credits >= amount)
+        .values(credits=User.credits - amount)
+    )
+    if result.rowcount != 1:
+        db.rollback()
+        db.refresh(user)
+        raise HTTPException(402, f"رصيدك {user.credits} كريدت والعملية تحتاج {amount}. رقّي باقتك.")
     db.add(CreditLedger(user_id=user.id, delta=-amount, reason=reason, job_id=job_id))
     db.commit()
+    db.refresh(user)
 
 
-def refund(db: Session, user: User, amount: int, job_id: str) -> None:
-    user.credits += amount
-    db.add(CreditLedger(user_id=user.id, delta=amount, reason="refund_failed_job", job_id=job_id))
+def refund(db: Session, user: User, amount: int, job_id: str, reason: str = "refund_failed_job") -> None:
+    db.execute(update(User).where(User.id == user.id).values(credits=User.credits + amount))
+    db.add(CreditLedger(user_id=user.id, delta=amount, reason=reason, job_id=job_id))
     db.commit()
+    db.refresh(user)

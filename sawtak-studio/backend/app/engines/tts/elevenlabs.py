@@ -34,8 +34,10 @@ class ElevenLabsTTS(TTSEngine):
         body = {
             "text": text,
             "model_id": settings.ELEVENLABS_MODEL,
-            "voice_settings": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.2,
-                               "use_speaker_boost": True},
+            "voice_settings": {"stability": settings.ELEVENLABS_STABILITY,
+                               "similarity_boost": settings.ELEVENLABS_SIMILARITY,
+                               "style": settings.ELEVENLABS_STYLE,
+                               "use_speaker_boost": "v3" not in settings.ELEVENLABS_MODEL},
         }
         # multilingual_v2 auto-detects the language; flash/turbo accept an explicit hint
         if "flash" in settings.ELEVENLABS_MODEL or "turbo" in settings.ELEVENLABS_MODEL:

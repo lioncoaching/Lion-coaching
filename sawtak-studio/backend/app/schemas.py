@@ -1,12 +1,27 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, EmailStr, Field
+import re
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
+_HTML_CHARS = re.compile(r"[<>\"'&]")
+
+
+def plain_text(value: str) -> str:
+    """Names are shown in HTML by every client; keep them free of markup characters."""
+    return _HTML_CHARS.sub("", value).strip()
+
 
 
 class SignupIn(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     name: str = Field(default="", max_length=120)
+
+    @field_validator("name")
+    @classmethod
+    def _clean_name(cls, v: str) -> str:
+        return plain_text(v)
 
 
 class LoginIn(BaseModel):

@@ -37,12 +37,11 @@ def _own_voice(db: Session, user: User, voice_id: str) -> Voice:
 
 
 def _submit(db: Session, user: User, kind: str, params: dict, cost: int) -> JobOut:
-    credits.require(db, user, cost)
     job = Job(user_id=user.id, kind=kind, params_json=json.dumps(params, ensure_ascii=False),
               credits_cost=cost)
+    credits.charge(db, user, cost, kind, job.id)  # raises 402 before anything is queued
     db.add(job)
     db.commit()
-    credits.charge(db, user, cost, kind, job.id)
     worker.enqueue(job.id)
     return job_out(job)
 
@@ -50,12 +49,12 @@ def _submit(db: Session, user: User, kind: str, params: dict, cost: int) -> JobO
 @router.post("/translate")
 def translate(data: TranslateIn, user: User = Depends(current_user), db: Session = Depends(get_db)):
     cost = credits.tts_cost(data.text) // 2 or 1
-    credits.require(db, user, cost)
+    credits.charge(db, user, cost, "translate")
     try:
         out = get_translator().translate(data.text, data.target, data.source)
     except Exception as e:  # noqa: BLE001
+        credits.refund(db, user, cost, "", reason="refund_failed_translate")
         raise HTTPException(502, str(e))
-    credits.charge(db, user, cost, "translate")
     return {"text": out, "target": data.target, "credits_cost": cost}
 
 

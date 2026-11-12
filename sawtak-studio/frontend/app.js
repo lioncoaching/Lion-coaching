@@ -1,6 +1,8 @@
 /* Sawtak Studio dashboard — vanilla JS, talks to /api. */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+/** Escape anything user- or server-provided before it goes into an HTML template string. */
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 let token = localStorage.getItem("sawtak_token");
 let me = null, config = null, langs = {}, voices = [], jobs = [], plans = {};
 
@@ -71,8 +73,9 @@ function renderMe() {
   $("#billPlan").textContent = me.plan_info.name; $("#billCredits").textContent = me.credits;
   $("#apiKey").textContent = me.api_key;
   $("#adminLink").style.display = me.is_admin ? "flex" : "none";
+  $("#remoteCard").style.display = me.is_admin ? "block" : "none";
   $("#billPlans").innerHTML = ["free", "creator", "pro", "agency"].map(k => { const p = plans[k]; return `
-    <div class="card plan ${me.plan === k ? "hot" : ""}"><h3>${p.name}</h3><div class="price">${p.price_egp ? p.price_egp + " ج" : "مجاناً"}<small>${p.price_egp ? " / شهر" : ""}</small></div>
+    <div class="card plan ${me.plan === k ? "hot" : ""}"><h3>${esc(p.name)}</h3><div class="price">${p.price_egp ? p.price_egp + " ج" : "مجاناً"}<small>${p.price_egp ? " / شهر" : ""}</small></div>
     <ul><li>${p.monthly_credits} كريدت</li><li>${p.max_voices} صوت</li><li>فيديو حتى ${p.max_video_seconds} ث</li><li>${p.watermark ? "علامة مائية" : "بدون علامة"}</li></ul>
     ${me.plan === k ? '<span class="badge done">باقتك الحالية</span>' : `<button class="btn primary sm" onclick="upgrade('${k}')">اشترك</button>`}</div>`; }).join("");
 }
@@ -98,9 +101,9 @@ $("#menuBtn").onclick = () => $("#side").classList.toggle("open");
 async function loadVoices() {
   voices = await api("/api/voices");
   $("#kVoices").textContent = voices.length;
-  $("#voiceList").innerHTML = voices.length ? voices.map(v => `<div class="item"><div class="grow"><b>${v.name}</b><div class="meta">${langs[v.language] || v.language} · ${v.engine} · ${fmtDate(v.created_at)}</div></div>
+  $("#voiceList").innerHTML = voices.length ? voices.map(v => `<div class="item"><div class="grow"><b>${esc(v.name)}</b><div class="meta">${esc(langs[v.language] || v.language)} · ${esc(v.engine)} · ${fmtDate(v.created_at)}</div></div>
     <button class="btn sm danger" onclick="delVoice('${v.id}')">حذف</button></div>`).join("") : '<p class="hint">لسه مفيش أصوات. ارفع عينة فوق 👆</p>';
-  const opts = voices.map(v => `<option value="${v.id}">${v.name}</option>`).join("");
+  const opts = voices.map(v => `<option value="${esc(v.id)}">${esc(v.name)}</option>`).join("");
   $$(".voiceSelect").forEach(s => s.innerHTML = opts || '<option value="">— استنسخ صوت الأول —</option>');
 }
 window.delVoice = async id => { if (!confirm("تحذف الصوت ده؟")) return; await api(`/api/voices/${id}`, { method: "DELETE" }); toast("اتحذف"); loadVoices(); };
@@ -110,7 +113,7 @@ $("#cloneForm").onsubmit = async e => {
   catch (err) { toast(err.message, "err"); } finally { btn.disabled = false; }
 };
 $("#loadRemote").onclick = async () => {
-  try { const r = await api("/api/voices/remote"); $("#remoteVoices").innerHTML = r.map(v => `<option value="${v.voice_id}">${v.name} (${v.category})</option>`).join("") || "<option>لا يوجد</option>"; }
+  try { const r = await api("/api/voices/remote"); $("#remoteVoices").innerHTML = r.map(v => `<option value="${esc(v.voice_id)}">${esc(v.name)} (${esc(v.category)})</option>`).join("") || "<option>لا يوجد</option>"; }
   catch (err) { toast(err.message, "err"); }
 };
 $("#importRemote").onclick = async () => {
@@ -141,9 +144,9 @@ $("#recBtn").onclick = async () => {
 async function refreshMe() { me = await api("/api/auth/me"); renderMe(); }
 function jobCard(j) {
   const out = j.output_url ? (j.kind === "tts" ? `<audio controls src="${j.output_url}?t=${token}"></audio>` : `<video controls playsinline src="${j.output_url}?t=${token}"></video>`) : "";
-  const txt = j.params.translated_text ? `<div class="meta">🌍 الترجمة: ${j.params.translated_text}</div>` : "";
+  const txt = j.params.translated_text ? `<div class="meta">🌍 الترجمة: ${esc(j.params.translated_text)}</div>` : "";
   return `<div class="item" id="job-${j.id}"><div class="grow"><b>${kindName[j.kind]}</b> <span class="badge ${j.status}">${statusName[j.status]}</span>
-    <div class="meta">${(j.params.text || j.params.target_lang || "").slice(0, 120)}</div>${txt}<div class="meta">${j.message} · ${j.credits_cost} كريدت · ${fmtDate(j.created_at)}</div>
+    <div class="meta">${esc((j.params.text || j.params.target_lang || "").slice(0, 120))}</div>${txt}<div class="meta">${esc(j.message)} · ${esc(j.credits_cost)} كريدت · ${fmtDate(j.created_at)}</div>
     ${j.status === "running" || j.status === "queued" ? `<div class="bar"><i style="width:${Math.round(j.progress * 100)}%"></i></div>` : ""}${out}</div>
     ${j.output_url ? `<a class="btn sm" href="${j.output_url}?t=${token}" download>⬇️ تحميل</a>` : ""}<button class="btn sm danger" onclick="delJob('${j.id}')">🗑</button></div>`;
 }
@@ -180,12 +183,12 @@ $("#dubForm").onsubmit = e => { e.preventDefault(); submitJob(e.target, "/api/du
 $("#rotateKey").onclick = async () => { me = await api("/api/auth/rotate-key", { method: "POST" }); renderMe(); toast("اتجدد المفتاح"); };
 async function loadLedger() {
   const l = await api("/api/billing/ledger");
-  $("#ledger").innerHTML = l.map(r => `<div class="item"><div class="grow"><b style="color:${r.delta > 0 ? "var(--ok)" : "var(--err)"}">${r.delta > 0 ? "+" : ""}${r.delta}</b> <span class="meta">${r.reason} ${r.job_id || ""}</span></div><span class="meta">${fmtDate(r.at)}</span></div>`).join("") || '<p class="hint">فاضي</p>';
+  $("#ledger").innerHTML = l.map(r => `<div class="item"><div class="grow"><b style="color:${r.delta > 0 ? "var(--ok)" : "var(--err)"}">${r.delta > 0 ? "+" : ""}${r.delta}</b> <span class="meta">${esc(r.reason)} ${esc(r.job_id || "")}</span></div><span class="meta">${fmtDate(r.at)}</span></div>`).join("") || '<p class="hint">فاضي</p>';
 }
 async function loadAdmin() {
   if (!me.is_admin) return;
   const u = await api("/api/billing/admin/users");
-  $("#adminUsers").innerHTML = u.map(x => `<div class="item"><div class="grow"><b>${x.email}</b> <span class="badge">${x.plan}</span><div class="meta">${x.name} · ${x.credits} كريدت · ${x.voices} صوت · ${x.jobs} عمل · ${fmtDate(x.created_at)}</div></div></div>`).join("");
+  $("#adminUsers").innerHTML = u.map(x => `<div class="item"><div class="grow"><b>${esc(x.email)}</b> <span class="badge">${esc(x.plan)}</span><div class="meta">${esc(x.name)} · ${esc(x.credits)} كريدت · ${esc(x.voices)} صوت · ${esc(x.jobs)} عمل · ${fmtDate(x.created_at)}</div></div></div>`).join("");
 }
 $("#adminForm").onsubmit = async e => {
   e.preventDefault(); const f = Object.fromEntries(new FormData(e.target));

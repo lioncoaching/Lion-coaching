@@ -50,6 +50,7 @@ class Voice(Base):
     engine_ref: Mapped[str] = mapped_column(String(512))
     sample_path: Mapped[str] = mapped_column(String(512), default="")
     description: Mapped[str] = mapped_column(Text, default="")
+    origin: Mapped[str] = mapped_column(String(16), default="cloned")  # cloned | imported
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     owner: Mapped[User] = relationship(back_populates="voices")
