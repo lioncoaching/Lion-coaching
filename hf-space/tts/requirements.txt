@@ -1,8 +1,0 @@
---extra-index-url https://download.pytorch.org/whl/cpu
-torch>=2.4
-torchaudio
-cairo-tts==0.2.0
-chatterbox-tts
-transformers>=4.44
-sentencepiece
-gradio>=5.0
